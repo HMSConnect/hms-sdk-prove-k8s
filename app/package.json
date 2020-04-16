@@ -85,7 +85,8 @@
     "rxjs": "^6.5.4",
     "styled-jsx-plugin-postcss": "0.1.0",
     "stylus": "^0.54.5",
-    "url-loader": "^2.0.0"
+    "url-loader": "^2.0.0",
+    "ws": "^7.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
@@ -129,5 +130,9 @@
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.1"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
   }
 }
