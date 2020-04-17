@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import RouteManager from '@routes/RouteManager'
+import Typography from '@material-ui/core/Typography'
 import * as _ from 'lodash'
 import getConfig from 'next/config'
 import routes from '../routes'
@@ -27,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
   },
   root: {
-    marginTop: 18,
+    display: 'flex',
     width: '100%',
   },
 }))
@@ -36,12 +37,22 @@ function ListItemLink(props: any) {
   return <ListItem button component='a' {...props} />
 }
 
-class AppComponent extends React.Component {
+interface IProps {
+  classes: {
+    card: string,
+    root: string
+  }
+}
+
+class AppComponent extends React.Component<IProps> {
 
   ws = new WebSocket(URL)
   state = {
     messages:[],
-    time:'YYYY-MM-DD HH:mm:ss:zzz'
+    time:'YYYY-MM-DD HH:mm:ss:zzz',
+    maxGap:0,
+    previous:'',
+    gap:0
   }
 
   constructor(props: any) {
@@ -56,14 +67,23 @@ class AppComponent extends React.Component {
 
     this.ws.onmessage = evt => {
       // on receiving a message, add it to the list of messages
-      const message:String = evt.data//JSON.parse(evt.data)
+      const message:string = evt.data//JSON.parse(evt.data)
       console.log(message);
 
       // const msg:Array<String> = [...this.state.messages];
       // msg.push(message);
       // this.setState({ messages:msg })
 
-      this.setState({ time:message })
+      const gap:number = Date.parse(message) - Date.parse(this.state.previous)
+      console.log('Gap:', gap);
+
+      this.setState({ time:message }, () => {
+        this.setState({ 
+          gap: gap,
+          previous: this.state.time,
+          // maxGap: gap > this.state.maxGap ? gap : this.state.maxGap
+        })
+      })
     }
 
     this.ws.onclose = () => {
@@ -81,29 +101,23 @@ class AppComponent extends React.Component {
   }
 
   render() {
+
+    const { classes } = this.props
     
     return (
       <React.Fragment>
         <CssBaseline />
         <Grid
-          // className={classes.root}
           container
-          direction='row'
-          justify='center'
-          alignItems='center'
+          spacing={2}
+          style={{ minHeight: '100vh', maxWidth: '100%' }}
         >
-          {/* <Paper className={classes.card}> */}
-          {/* <Paper> */}
-          {
-            // this.state.messages.map((v,i) => {
-            //   return (
-            //     <p key={i}>{v}</p>
-            //   )
-            // })
-            <p>{this.state.time}</p>
-
-          }
-          {/* </Paper> */}
+          <Grid item xs={12} style={{ alignSelf:'center', textAlign:'center' }}>
+            <Typography variant='h4'><strong>{this.state.time}</strong></Typography>
+            <Typography variant='body2'>
+              <strong>{`Gap: ${this.state.gap} milliseconds`}</strong>
+            </Typography>
+          </Grid>
         </Grid>
       </React.Fragment>
     )
@@ -111,8 +125,9 @@ class AppComponent extends React.Component {
 }
 
 export default function App(props:any) {
+  const classes = useStyles();
 
   return (
-    <AppComponent {...props}/>
+    <AppComponent classes={classes} {...props}/>
   )
 }

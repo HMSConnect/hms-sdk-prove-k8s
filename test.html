@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test K8s zero-downtime</title>
+    </head>
+    <body>
+
+
+
+        <div style='min-height:100vh;max-width:100%'>
+            <div style='align-self:"center";text-align:"center"'>
+                <strong><h4 id='time'>time</h4></strong>
+                <strong>
+                    Gap:
+                    <span id='gap'></span>
+                    milliseconds
+                </strong>
+                <hr/>
+                <p>max gap list (more than one seconds):</p>
+                <ul id='max-gap-list'>
+
+                </ul>
+            </div>
+        </div>
+
+        <script type='text/javascript'>
+            const URL = 'ws://localhost:3003'
+
+            let ws = null;
+
+            let time = 'YYYY-MM-DD HH:mm:ss:zzz'
+            let maxGap = []
+            let previous = ''
+            let gap = 0
+            let intervalReconnect = null;
+
+
+            function stopRecconect() {
+                if(intervalReconnect) {
+                    clearInterval(intervalReconnect)
+                    intervalReconnect = null;
+                }
+            }
+
+            function connect() {
+
+                ws = new WebSocket(URL)
+
+                ws.onopen = () => {
+                    // on connecting, do nothing but log it to the console
+                    console.log('connected')
+                    stopRecconect();
+                }
+
+                ws.onmessage = evt => {
+                    // on receiving a message, add it to the list of messages
+                    const message = evt.data//JSON.parse(evt.data)
+                    console.log(message);
+
+                    // const msg:Array<String> = [...this.state.messages];
+                    // msg.push(message);
+                    // this.setState({ messages:msg })
+
+                    const newGap = Date.parse(message) - Date.parse(previous)
+                    console.log('Gap:', gap);
+
+                    time = message 
+                    gap = newGap
+                    previous = time
+
+                    if(gap > 1000) { 
+                        maxGap.push(gap)
+                    }
+
+                    let list = '';
+                    maxGap.forEach(v => {
+                        list += "<li>" + v + "</li>"
+                    })
+
+
+                    document.getElementById('time').innerText = time
+                    document.getElementById('gap').innerText = gap
+                    document.getElementById('max-gap-list').innerHTML = list;
+                }
+
+                ws.onclose = () => {
+                    console.log('disconnected')
+
+                    ws.close();
+                    ws = null;
+                    reconnect();
+                }
+
+            }
+
+            function reconnect() {
+                if(intervalReconnect==null) {
+                    intervalReconnect = setInterval(() => {
+                        console.warn('reconnecting...')
+                        if(ws == null) {
+                            connect()
+                        }
+                    }, 1000)
+                }
+            }
+
+            reconnect();
+        </script>
+    </body>
+</html>
