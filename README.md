@@ -6,9 +6,11 @@ POC zero-downtime strategy on K8s with simple clock application.
 
 ## **Scenario**
 
- - The application take more time to download/install dependencies.
- - User should not see grab of time on digital clock after developer deployed source code in new version.
- - Digital clock MUST NOT stop.
+ 1. The application take more time to download/install dependencies.
+ 2. User should not see gap of time on digital clock after :
+    - developer deployed source code in new version.
+    - service was cutoff.
+ 3. Digital clock MUST NOT stop.
 
 ## **Project structure**
 
@@ -17,14 +19,14 @@ repository
 |- app            # <------------ main service
 .
 .
-|- fake           # <------------ data source for main service
+|- test.html      # <------------ time monitoring here
 |- ...
 `- README.md
 ```
 
 ## **Usage**
 
-### 1. Start Data source
+### 1. Start Main app
 
 ```bash
 # from root directory
@@ -33,17 +35,8 @@ $ npm i
 $ npm run dev
 ```
 
-### 2. Start Main app
+### 2. Open monitoring file (HTML)
 
-```bash
-# from root directory
-$ cd app
-$ npm i
-$ npm run dev
-```
+Double click on `test.html`
 
-Enjoy via 
-
-```
-http://localhost:3000
-```
+Enjoy monitor it
